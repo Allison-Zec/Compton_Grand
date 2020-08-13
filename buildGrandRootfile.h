@@ -26,6 +26,10 @@ vector<DataVar> cycMPSData;
 // quartetwise
 //vector<vector<TString>> cycQrtVars;
 vector<DataVar> cycQrtData;
+//triggerwise
+//Float_t meanPedF, meanErrPedF, rmsPedF, rmsErrPedF;
+//Float_t meanPedL, meanErrPedL, rmsPedL, rmsErrPedL;
+DataVar firstOffPedestal, lastOffPedestal;
 // calculations
 Float_t cycleTime;
 vector<TString> cycQrtPols;

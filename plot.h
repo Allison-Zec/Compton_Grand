@@ -207,6 +207,58 @@ void cycQrtPlots(TTree *quartetwise, Int_t runNum, Int_t cycNum, vector<int> cyc
   }
 }
 
+void cycTrgPlots(TTree* triggerwise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
+  Int_t fStart = cyc[0]; Int_t fEnd = cyc[1];
+  Int_t lStart = cyc[4]; Int_t lEnd = cyc[5];
+  TString per1 = Form("(mpsCoda>=%i && mpsCoda<=%i)", fStart, fEnd);
+  TString per3 = Form("(mpsCoda>=%i && mpsCoda<=%i)", lStart, lEnd);
+  TString cycCut = Form("((mpsCoda>=%i && mpsCoda<=%i) || (mpsCoda>=%i && mpsCoda<=%i))", fStart, fEnd, lStart, lEnd);
+
+  TString correctPedCut1("2.0*abs(sumPre - sumPost)/(sumPre + sumPost) < 0.03");
+  TString correctPedCut2("(sumPre + sumPost)/2.0 < 3900");
+  TString narrowPedCut("abs(sumPre - sumPost) < 50");
+  TString limitCut("((sumPre + sumPost)/2.0>=3770 && (sumPre + sumPost)/2.0<=3800)");
+
+  TString fCuts = Form("%s && %s && %s && %s && %s", per1.Data(), correctPedCut1.Data(), correctPedCut2.Data(), narrowPedCut.Data(), limitCut.Data());
+  TString lCuts = Form("%s && %s && %s && %s && %s", per3.Data(), correctPedCut1.Data(), correctPedCut2.Data(), narrowPedCut.Data(), limitCut.Data());
+
+  TString hNameF = Form("h%i.%i_pedF", runNum, cycNum);
+  TString hNameL = Form("h%i.%i_pedL", runNum, cycNum);
+  TString fNameF1 = Form("f%i.%i_pedF1", runNum, cycNum);
+  TString fNameF2 = Form("f%i.%i_pedF2", runNum, cycNum);
+  TString fNameL1 = Form("f%i.%i_pedL1", runNum, cycNum);
+  TString fNameL2 = Form("f%i.%i_pedL2", runNum, cycNum);
+  TString meas("(sumPre + sumPost)/2.0");
+
+  triggerwise->Draw(Form("%s>>%s", meas.Data(), hNameF.Data()), fCuts.Data(), "goff");
+  triggerwise->Draw(Form("%s>>%s", meas.Data(), hNameL.Data()), lCuts.Data(), "goff");
+  
+  TH1F *hF = (TH1F *)gDirectory->Get(hNameF.Data());
+  TH1F *hL = (TH1F *)gDirectory->Get(hNameL.Data());
+
+  runOut->cd(); hF->Write(); hL->Write();
+  /**
+  TF1 *fF1 = new TF1(fNameF1.Data(), "gaus");
+  TF1 *fF2 = new TF1(fNameF2.Data(), "gaus");
+  TF1 *fL1 = new TF1(fNameL1.Data(), "gaus");
+  TF1 *fL2 = new TF1(fNameL2.Data(), "gaus");
+
+  Float_t meanF1 = hF->GetMean(); Float_t rmsF1 = hF->GetRMS();
+  Float_t meanL1 = hL->GetMean(); Float_t rmsL1 = hL->GetRMS();
+  hF->Fit(fNameF1.Data(), "Q", "goff", meanF1 - rmsF1, meanF1 + rmsF1);
+  hL->Fit(fNameL1.Data(), "Q", "goff", meanL1 - rmsL1, meanL1 + rmsL1);
+  Float_t meanF2 = fF1->GetParameter(1); Float_t rmsF2 = fF1->GetParameter(2);
+  Float_t meanL2 = fL1->GetParameter(1); Float_t rmsL2 = fF1->GetParameter(2);
+  hF->Fit(fNameF2.Data(), "Q", "goff", meanF2 - rmsF2, meanF2 + rmsF2);
+  hL->Fit(fNameL2.Data(), "Q", "goff", meanL2 - rmsL2, meanL2 + rmsL2);
+  meanPedF = fF2->GetParameter(1); meanErrPedF = fF2->GetParError(1);
+  rmsPedF  = fF2->GetParameter(2); rmsErrPedF  = fF2->GetParError(2);
+  meanPedL = fL2->GetParameter(1); meanErrPedL = fL2->GetParError(1);
+  rmsPedL  = fL2->GetParameter(2); rmsErrPedL  = fL2->GetParError(2);
+  **/
+  
+}
+
 void runMPSPlots(TTree *mpswise, Int_t runNum, TFile *runOut){
   TString varCuts[23] =  {B1L1, B1L0, B0, B1L1, B1L0, B0,
                           L1, B1, B1, B1, B1, B1,

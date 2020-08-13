@@ -82,6 +82,36 @@ void calcCyclePol(Int_t runNum){
   //snlPol4Avg.push_back(pol4.mean); snlPol4Err.push_back(pol4.meanErr);
 }
 
+void calcCyclePedestals(TFile *plotfile){
+  TString hNameF = Form("h%i.%i_pedF", runNum, cycleNum);
+  TString hNameL = Form("h%i.%i_pedL", runNum, cycleNum);
+  TString fNameF1 = Form("h%i.%i_pedF1", runNum, cycleNum);
+  TString fNameF2 = Form("h%i.%i_pedF2", runNum, cycleNum);
+  TString fNameL1 = Form("h%i.%i_pedL1", runNum, cycleNum);
+  TString fNameL2 = Form("h%i.%i_pedL2", runNum, cycleNum);
+
+  TH1F *hF = (TH1F *)plotfile->Get(hNameF.Data());
+  TH1F *hL = (TH1F *)plotfile->Get(hNameL.Data());
+
+  TF1 *fF1 = new TF1(fNameF1.Data(), "gaus");
+  TF1 *fF2 = new TF1(fNameF2.Data(), "gaus");
+  TF1 *fL1 = new TF1(fNameL1.Data(), "gaus");
+  TF1 *fL2 = new TF1(fNameL2.Data(), "gaus");
+
+  Float_t meanF1 = hF->GetMean(); Float_t rmsF1 = hF->GetRMS();
+  Float_t meanL1 = hL->GetMean(); Float_t rmsL1 = hL->GetRMS();
+  hF->Fit(fNameF1.Data(), "Q", "goff", meanF1 - rmsF1, meanF1 + rmsF1);
+  hL->Fit(fNameL1.Data(), "Q", "goff", meanL1 - rmsL1, meanL1 + rmsL1);
+  Float_t meanF2 = fF1->GetParameter(1); Float_t rmsF2 = fF1->GetParameter(2);
+  Float_t meanL2 = fL1->GetParameter(1); Float_t rmsL2 = fF1->GetParameter(2);
+  hF->Fit(fNameF2.Data(), "Q", "goff", meanF2 - rmsF2, meanF2 + rmsF2);
+  hL->Fit(fNameL2.Data(), "Q", "goff", meanL2 - rmsL2, meanL2 + rmsL2);
+  firstOffPedestal.mean = fF2->GetParameter(1); firstOffPedestal.meanErr = fF2->GetParError(1);
+  firstOffPedestal.rms  = fF2->GetParameter(2); firstOffPedestal.rmsErr  = fF2->GetParError(2);
+  lastOffPedestal.mean  = fL2->GetParameter(1); lastOffPedestal.meanErr  = fL2->GetParError(1);
+  lastOffPedestal.rms   = fL2->GetParameter(2); lastOffPedestal.rmsErr   = fL2->GetParError(2);
+}
+
 Bool_t isCloseTo(Float_t num, Float_t ref){
   Bool_t val = TMath::Abs(num)>=0.99*TMath::Abs(ref) && TMath::Abs(num)<=1.01*TMath::Abs(ref);
   //printf("Close to checks: Num: %f, Ref: %f, Result: %s\n", num, ref, val ? "true" : "false");
@@ -139,6 +169,8 @@ void initCycleTree(TTree *cyc){
   cyc->Branch("cycleTime", &cycleTime);
   for(Int_t i = 0; i < cycMPSVars; i++){DataVar data; cycMPSData.push_back(data);}
   for(Int_t i = 0; i < cycMPSVars; i++){cyc->Branch(cycMPSTitles[i].Data(), &cycMPSData[i], "mean/F:meanErr/F:rms/F:rmsErr/F");}
+  cyc->Branch("PedestalMeanFirstOff", &firstOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
+  cyc->Branch("PedestalMeanLastOff", &lastOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
   for(Int_t i = 0; i < cycQrtVars; i++){DataVar data; cycQrtData.push_back(data);}
   for(Int_t i = 0; i < cycQrtVars; i++){cyc->Branch(cycQrtTitles[i].Data(), &cycQrtData[i], "mean/F:meanErr/F:rms/F:rmsErr/F");}
   cyc->Branch("AnalyzingPower", &anPow, "AnalyzingPower/F");
@@ -374,6 +406,7 @@ void cycleIterSet(vector<vector<int>> cycles, Int_t cycInd, Int_t runNumber, TFi
   TH1F *h4 = (TH1F *)plotFile->Get(hAsym4Name.Data());
   asym4LasOn.mean = h4->GetMean(); asym4LasOn.meanErr = h4->GetMeanError();
   calcCyclePol(runNumber);
+  calcCyclePedestals(plotFile);
 }
 
 /**

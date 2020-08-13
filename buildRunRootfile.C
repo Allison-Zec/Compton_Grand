@@ -86,6 +86,7 @@ void buildRunRootfile(Int_t runNum){
   TTree *mpswise = (TTree *)gDirectory->Get("mpswise");
   TTree *quartetwise = (TTree *)gDirectory->Get("quartetwise");
   TTree *epicswise = (TTree *)gDirectory->Get("epicswise");
+  TTree *triggerwise = (TTree *)gDirectory->Get("triggerwise");
   vector<vector<int>> cycles = findCycles(runNum);
   for(Int_t c = 0; c < cycles.size(); c++){
     printf("Plotting cycle %i...\n", c + 1);
@@ -116,6 +117,8 @@ void buildRunRootfile(Int_t runNum){
       runOut->cd(); h->Write();
     }
     **/
+    printf("  Plotting triggerwise vars...\n");
+    cycTrgPlots(triggerwise, runNum, c+1, cycles[c], runOut);
   }
   printf("  Plotting run mps vars...\n");
   runMPSPlots(mpswise, runNum, runOut);
