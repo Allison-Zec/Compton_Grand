@@ -406,7 +406,7 @@ void cycleIterSet(vector<vector<int>> cycles, Int_t cycInd, Int_t runNumber, TFi
   TH1F *h4 = (TH1F *)plotFile->Get(hAsym4Name.Data());
   asym4LasOn.mean = h4->GetMean(); asym4LasOn.meanErr = h4->GetMeanError();
   calcCyclePol(runNumber);
-  //calcCyclePedestals(plotFile);
+  calcCyclePedestals(plotFile);
 }
 
 /**
