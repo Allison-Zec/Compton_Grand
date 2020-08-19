@@ -2,8 +2,18 @@
 
 using namespace std;
 
-void bpmProjectionPlot(){
-  TFile *f = new TFile(Form("%s/grandCompton.root", getenv("COMPMON_GRAND")), "READ");
+void bpmProjectionPlot(Int_t prexOrCrex){
+  TFile *f;
+  if(prexOrCrex == 1){
+    f = TFile::Open(Form("%s/prexGrandCompton.root", getenv("COMPMON_GRAND")));
+  }
+  else if(prexOrCrex == 2){
+    f = TFile::Open(Form("%s/crexGrandCompton.root", getenv("COMPMON_GRAND")));
+  }
+  else{
+    printf("ERROR: invalid experiment code\n");
+    exit(1);
+  }
   TTree *tree = (TTree *)f->Get("run");
 
   TCanvas *c = new TCanvas("cBPM", "BPM Canvas", 1200, 800);
