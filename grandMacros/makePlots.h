@@ -277,7 +277,7 @@ void plotPolRun(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Fl
     Float_t polVar = var.mean; Float_t polErr = var.meanErr;
     if(chi2){polVar = var.Chi2*1.0/var.NDF; polErr = 0.0;}
     if(signCorr){polVar = var.mean*sign; polErr = var.meanErr*sign;}
-    if(TMath::IsNaN(polVar)) continue;
+    if(TMath::IsNaN(polVar) || var.NDF==0) continue;
     graphs[ind]->SetPoint(graphCounts[ind], runNum, polVar);
     graphs[ind]->SetPointError(graphCounts[ind], 0.0, TMath::Abs(polErr));
     graphCounts[ind] += 1;

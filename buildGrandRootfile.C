@@ -169,8 +169,8 @@ void initCycleTree(TTree *cyc){
   cyc->Branch("cycleTime", &cycleTime);
   for(Int_t i = 0; i < cycMPSVars; i++){DataVar data; cycMPSData.push_back(data);}
   for(Int_t i = 0; i < cycMPSVars; i++){cyc->Branch(cycMPSTitles[i].Data(), &cycMPSData[i], "mean/F:meanErr/F:rms/F:rmsErr/F");}
-  cyc->Branch("PedestalMeanFirstOff", &firstOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
-  cyc->Branch("PedestalMeanLastOff", &lastOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
+  //cyc->Branch("PedestalMeanFirstOff", &firstOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
+  //cyc->Branch("PedestalMeanLastOff", &lastOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
   for(Int_t i = 0; i < cycQrtVars; i++){DataVar data; cycQrtData.push_back(data);}
   for(Int_t i = 0; i < cycQrtVars; i++){cyc->Branch(cycQrtTitles[i].Data(), &cycQrtData[i], "mean/F:meanErr/F:rms/F:rmsErr/F");}
   cyc->Branch("AnalyzingPower", &anPow, "AnalyzingPower/F");
@@ -406,7 +406,7 @@ void cycleIterSet(vector<vector<int>> cycles, Int_t cycInd, Int_t runNumber, TFi
   TH1F *h4 = (TH1F *)plotFile->Get(hAsym4Name.Data());
   asym4LasOn.mean = h4->GetMean(); asym4LasOn.meanErr = h4->GetMeanError();
   calcCyclePol(runNumber);
-  calcCyclePedestals(plotFile);
+  //calcCyclePedestals(plotFile);
 }
 
 /**

@@ -18,7 +18,8 @@
 using namespace std;
 
 void pedRMSCuts(){
-  TFile *f = TFile::Open(Form("%s/prexGrandCompton.root", getenv("COMPMON_GRAND")));
+  //TFile *f = TFile::Open(Form("%s/prexGrandCompton.root", getenv("COMPMON_GRAND")));
+  TFile *f = TFile::Open("~/ajzec/grand/prexGrandCompton.root");
   TTree *cyc = (TTree *)f->Get("cyc");
   
   Int_t runNum, cycNum;
