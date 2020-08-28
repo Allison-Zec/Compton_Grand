@@ -59,7 +59,7 @@ void plotCycleRMS(Int_t prexOrCrex){
     hL->SetBinError(i+1, lOff.rmsErr);
     hO->SetBinContent(i+1, on.rms);
     hO->SetBinError(i+1, on.rmsErr);
-    if(i % 100 == 0){
+    if(i % 4 == 0){
       hF->GetXaxis()->SetBinLabel(i+1, Form("%i.%i", runNum, cycNum));
       hL->GetXaxis()->SetBinLabel(i+1, Form("%i.%i", runNum, cycNum));
       hO->GetXaxis()->SetBinLabel(i+1, Form("%i.%i", runNum, cycNum));

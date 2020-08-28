@@ -439,7 +439,7 @@ void buildGrandRootfile(Int_t prexOrCrex){
     //if(s < 29 || s > 39) continue;
     snailIterSet(base, s);
     for(Int_t r = 0; r < runList[s].size(); r++){
-      TFile *plotFile = new TFile(Form("%s/runPlots/Run%i_Plots.root", getenv("COMPMON_GRAND"), runList[s][r]), "READ");
+      TFile *plotFile = new TFile(Form("%s/Run%i_Plots.root", getenv("COMPMON_RUNPLOTS"), runList[s][r]), "READ");
       vector<vector<int>> cycles = findCycles(runList[s][r]);
       runIterSet(runList[s][r], (Int_t)cycles.size(), plotFile);
       for(Int_t c = 0; c < cycles.size(); c++){

@@ -75,7 +75,7 @@ void epicsPlots(vector<vector<TString>> runEpcVars, Int_t runNum, TTree *epicswi
 **/
 
 void buildRunRootfile(Int_t runNum){
-  TFile *runOut = new TFile(Form("%s/runPlots/Run%i_Plots.root", getenv("COMPMON_GRAND"), runNum), "RECREATE");
+  TFile *runOut = new TFile(Form("%s/Run%i_Plots.root", getenv("COMPMON_RUNPLOTS"), runNum), "RECREATE");
   TFile *infile = new TFile(Form("%s/compmon_%i.root", getenv("COMP_ROOTFILES"), runNum), "READ");
 
   //vector<vector<TString>> cycMPSVars = readVarsFile("cyc", "mpswise");

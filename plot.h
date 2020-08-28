@@ -325,7 +325,8 @@ void runEpicsPlots(TTree *epicswise, TTree* mpswise, Int_t runNum, TFile *runOut
     }
     mpswise->Project(hName.Data(), runEpcNames[i].Data(), cuts.Data());
     TH1F *h = (TH1F *)gDirectory->Get(hName.Data());
-    runOut->cd(); h->Write();
+    runOut->cd();
+    if(h) h->Write();
   }
 }
 
