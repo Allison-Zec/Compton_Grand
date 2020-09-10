@@ -16,6 +16,7 @@
 
 #include "vars.h"
 
+vector<vector<Float_t>> keys;
 // cyc tree
 // basics
 Int_t snailNum, runNum, cycleNum;
@@ -47,6 +48,7 @@ PolVar bkSubAsym4LasOn, bkSubAsym4LasOff, bkSubAsym4LasOff1, bkSubAsym4LasOff2, 
 PolVar asym0LasOn, asym0LasOff, asym0LasOff1, asym0LasOff2;
 PolVar asym4LasOn, asym4LasOff, asym4LasOff1, asym4LasOff2;
 PolVar pol0, pol4;
+Int_t cycleCut;
 
 // run tree
 // basics

@@ -4,6 +4,37 @@
 
 using namespace std;
 
+void readKeysFile(TString expt){
+  ifstream keysfile(Form("%s/%s_rmsCut.key", getenv("COMPMON_MAPS"), expt.Data()));
+  if(keysfile.is_open()){
+    string line;
+    while(getline(keysfile, line)){
+      vector<Float_t> keyRange; stringstream ss(line);
+      for(Float_t i; ss >> i;){
+        keyRange.push_back(i);
+        if(ss.peek() == ',')
+          ss.ignore();
+      }
+      keys.push_back(keyRange);
+    }
+  }
+  keysfile.close();
+}
+
+Bool_t acceptCycle(Int_t runNum){
+  if(keys.size() == 0){return true;}
+  else{
+    for(Int_t i = 0; i < keys.size(); i++){
+      if(runNum >= (Int_t)keys[i][0] && runNum <= (Int_t)keys[i][1]){
+        Float_t offLimit = keys[i][2] + keys[i][4];
+        Float_t onLimit = keys[i][3] + keys[i][4];
+        return cycMPSData[1].rms < offLimit && cycMPSData[2].rms < offLimit && cycMPSData[0].rms < onLimit;
+      }
+    }
+    return true;
+  }
+}
+
 void calcCyclePol(Int_t runNum){
   anPow = getAnalyzingPower(runNum);
 
@@ -72,14 +103,21 @@ void calcCyclePol(Int_t runNum){
   pol4.mean = asym4.mean/anPow;
   pol4.meanErr = asym4.meanErr/anPow;
 
-  runAsym0Avg.push_back(asym0.mean); runAsym0Err.push_back(asym0.meanErr);
-  runAsym0OffAvg.push_back(bkSubAsym0LasOff.mean); runAsym0OffErr.push_back(bkSubAsym0LasOff.meanErr);
-  runPol0Avg.push_back(pol0.mean); runPol0Err.push_back(pol0.meanErr);
-  snlAsym0Avg.push_back(asym0.mean); snlAsym0Err.push_back(asym0.meanErr);
-  snlAsym0OffAvg.push_back(bkSubAsym0LasOff.mean); snlAsym0OffErr.push_back(bkSubAsym0LasOff.meanErr);
-  //snlAsym4Avg.push_back(asym4.mean); snlAsym4Err.push_back(asym4.meanErr);
-  snlPol0Avg.push_back(pol0.mean); snlPol0Err.push_back(pol0.meanErr);
-  //snlPol4Avg.push_back(pol4.mean); snlPol4Err.push_back(pol4.meanErr);
+  if(acceptCycle(runNum)){
+    runAsym0Avg.push_back(asym0.mean); runAsym0Err.push_back(asym0.meanErr);
+    runAsym0OffAvg.push_back(bkSubAsym0LasOff.mean); runAsym0OffErr.push_back(bkSubAsym0LasOff.meanErr);
+    runPol0Avg.push_back(pol0.mean); runPol0Err.push_back(pol0.meanErr);
+    snlAsym0Avg.push_back(asym0.mean); snlAsym0Err.push_back(asym0.meanErr);
+    snlAsym0OffAvg.push_back(bkSubAsym0LasOff.mean); snlAsym0OffErr.push_back(bkSubAsym0LasOff.meanErr);
+    //snlAsym4Avg.push_back(asym4.mean); snlAsym4Err.push_back(asym4.meanErr);
+    snlPol0Avg.push_back(pol0.mean); snlPol0Err.push_back(pol0.meanErr);
+    //snlPol4Avg.push_back(pol4.mean); snlPol4Err.push_back(pol4.meanErr);
+    cycleCut = 0;
+  }
+  else{
+    printf("      Rejecting cycle for polarization!\n");
+    cycleCut = 1;
+  }
 }
 
 void calcCyclePedestals(TFile *plotfile){
@@ -194,6 +232,7 @@ void initCycleTree(TTree *cyc){
   cyc->Branch("BackSubAsym4LasOn", &bkSubAsym4LasOn, "mean/F:meanErr/F");
   cyc->Branch("BackSubAsym4LasOff1", &bkSubAsym4LasOff1, "mean/F:meanErr/F");
   cyc->Branch("BackSubAsym4LasOff2", &bkSubAsym4LasOff2, "mean/F:meanErr/F");
+  cyc->Branch("CycleCut", &cycleCut, "cycleCut/I");
 }
 
 void initRunTree(TTree *run){
@@ -423,6 +462,8 @@ void buildGrandRootfile(Int_t prexOrCrex){
     printf("    CREX == 2\n\n");
     printf("Get it right this time, %s.\n", randInsult());
   }
+  readKeysFile(expt);
+
   vector<vector<int>> runList = productionRunList(prexOrCrex);
   TFile *out = new TFile(Form("%s/%sGrandCompton.root", getenv("COMPMON_GRAND"), expt.Data()), "RECREATE");
   TTree *cyc = new TTree("cyc", "cycle testing tree");

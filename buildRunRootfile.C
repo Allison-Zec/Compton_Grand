@@ -89,13 +89,13 @@ void buildRunRootfile(Int_t runNum){
   TTree *triggerwise = (TTree *)gDirectory->Get("triggerwise");
   vector<vector<int>> cycles = findCycles(runNum);
   for(Int_t c = 0; c < cycles.size(); c++){
-    printf("Plotting cycle %i...\n", c + 1);
+    printf("Plotting cycle %i/%i...\n", c + 1, (Int_t)cycles.size());
     //Int_t firstOffStartMPS = cycles[c][0]; Int_t firstOffEndMPS = cycles[c][1];
     //Int_t onStartMPS = cycles[c][2]; Int_t onEndMPS = cycles[c][3];
     //Int_t lastOffStartMPS = cycles[c][4]; Int_t lastOffEndMPS = cycles[c][5];
     //TString cycCut = Form("((mpsCoda>=%i && mpsCoda<=%i) || (mpsCoda>=%i && mpsCoda<=%i) || (mpsCoda>=%i && mpsCoda<=%i))",
     //                    firstOffStartMPS, firstOffEndMPS, onStartMPS, onEndMPS, lastOffStartMPS, lastOffEndMPS);
-    printf("  Ploting mpswise vars...\n");
+    printf("  Plotting mpswise vars...\n");
     cycMPSPlots(mpswise, runNum, c+1, cycles[c], runOut);
     /**
     for(Int_t i = 0; i < cycMPSVars.size(); i++){
@@ -106,7 +106,7 @@ void buildRunRootfile(Int_t runNum){
       runOut->cd(); h->Write();
     }
     **/
-    printf("  Ploting quartetwise vars...\n");
+    printf("  Plotting quartetwise vars...\n");
     cycQrtPlots(quartetwise, runNum, c+1, cycles[c], runOut);
     /**
     for(Int_t i = 0; i < cycQrtVars.size(); i++){
@@ -135,4 +135,5 @@ void buildRunRootfile(Int_t runNum){
 
   //runOut->Write(); 
   runOut->Close();
+  printf("...Done!\n");
 }

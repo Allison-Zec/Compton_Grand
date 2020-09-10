@@ -122,7 +122,7 @@ void drawAndPrintGraphs(TString msmt, Int_t msmtNum, TCanvas *can, vector<TGraph
   can->Print(Form("%s/plots/msmt%04i_%s.pdf", getenv("COMPMON_GRAND"), msmtNum, msmt.Data()), "pdf");
 }
 
-void plotPolSnl(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Float_t largeFac, bool signCorr=true, bool chi2=false){
+void plotPolSnl(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Float_t largeFac, bool signCorr=true, bool chi2=false, Float_t factor=1.0){
   FitPolVar var;
   vector<TGraphErrors *> graphs;
   vector<Int_t> graphCounts;
@@ -162,9 +162,9 @@ void plotPolSnl(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Fl
     tree->GetEntry(i);
     if(sign == 0) continue;
     Int_t ind = getGraphInd(snailNum, hWien, vWien, solWien, ihwp, true);
-    Float_t polVar = var.mean; Float_t polErr = var.meanErr;
+    Float_t polVar = factor*var.mean; Float_t polErr = factor*var.meanErr;
     if(chi2){polVar = var.Chi2*1.0/var.NDF; polErr = 0.0;}
-    if(signCorr){polVar = var.mean*sign; polErr = var.meanErr*sign;}
+    if(signCorr){polVar = factor*var.mean*sign; polErr = factor*var.meanErr*sign;}
     graphs[ind]->SetPoint(graphCounts[ind], snailNum, polVar);
     graphs[ind]->SetPointError(graphCounts[ind], 0.0, TMath::Abs(polErr));
     graphCounts[ind] += 1;

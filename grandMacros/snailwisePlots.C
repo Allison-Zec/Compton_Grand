@@ -28,13 +28,14 @@ void snailwisePlots(Int_t prexOrCrex){
   TString stdVar[nStdPlots] = {"numRuns", "numCycles", "snailTime", "qw1", "hw1", "qw2"};
   Float_t polYmin[nPolPlots] = {0.99, 0.99, 0.99, 0.9, 0.9, 0.9};
   Float_t polYmax[nPolPlots] = {1.01, 1.01, 1.01, 1.1, 1.1, 1.1};
+  Float_t polFactors[nPolPlots] = {100., 1000., 1000., 100., 1000., 1000.};
   Float_t stdYmin[nStdPlots] = {0.0, 0.0, 0.0, 0.9, 0.9, 0.9};
   Float_t stdYmax[nStdPlots] = {1.1, 1.1, 1.1, 1.1, 1.1, 1.1};
   Bool_t polSign[nPolPlots] = {true, true, true, false, false, false};
   Bool_t stdFloat[nStdPlots] = {false, false, true, true, true, true};
 
   for(Int_t i = 0; i < nPolPlots; i++){
-    plotPolSnl(fname.Data(), polVar[i].Data(), nMsmt++, polYmin[i], polYmax[i], polSign[i]);
+    plotPolSnl(fname.Data(), polVar[i].Data(), nMsmt++, polYmin[i], polYmax[i], polSign[i], false, polFactors[i]);
   }
   plotPolSnl(fname.Data(), "Pol0", nMsmt++, 0.0, 1.1, false, true);
   plotPolSnl(fname.Data(), "Asym0LasOff", nMsmt++, 0.0, 1.1, false, true);

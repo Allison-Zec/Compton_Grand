@@ -131,11 +131,18 @@ void cycMPSPlots(TTree *mpswise, Int_t runNum, Int_t cycNum, vector<int> cyc, TF
   TString per3 = Form("mpsCoda>=%i && mpsCoda<=%i", lStart, lEnd);
   TString cycCut = Form("(mpsCoda>=%i && mpsCoda<=%i) || (mpsCoda>=%i && mpsCoda<=%i) || (mpsCoda>=%i && mpsCoda<=%i)", fStart, fEnd, oStart, oEnd, lStart, lEnd);
   
-  TString varCuts[cycMPSVars] =  {Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),
-                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),
-                                  L1, B1, B1, B1, B1, B1, B1L1, B1L0, B1, B1, B1, B1, B1L1, B1L0, B1L1, B1L0};
+  TString varCuts[cycMPSVars] =  {Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   Form("(%s) && (%s)", B1L0.Data(), per1.Data()),     //Acc0LasOn, Acc0LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   Form("(%s) && (%s)", B0.Data(), cycCut.Data()),     //Acc0LasOff2, Acc0BeamOff
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   Form("(%s) && (%s)", B1L0.Data(), per1.Data()),     //Acc4LasOn, Acc4LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   Form("(%s) && (%s)", B0.Data(), cycCut.Data()),     //Acc4LasOff2, Acc4BeamOff
+                                  Form("(%s) && (%s)", L1.Data(), cycCut.Data()),   Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //LaserPower, BeamCurrent
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()),   Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //bpmAx, bpmAy
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()),   Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //bpmBx, bpmBy
+                                  Form("(%s) && (%s)", B1L1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1L0.Data(), cycCut.Data()),   //CentralRateLasOn, CentralRateLasOff
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()),   Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //USbg1, USbg2
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()),   Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //DSbg1, DSbg2
+                                  Form("(%s) && (%s)", B1L1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1L0.Data(), cycCut.Data()),   //HFingerLasOn, HFingerLasOff
+                                  Form("(%s) && (%s)", B1L1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1L0.Data(), cycCut.Data())};  //VFingerLasOn, VFingerLasOff
 
   for(Int_t i = 0; i < cycMPSVars; i++){
     TString hName = Form("h%i.%i_%s", runNum, cycNum, cycMPSTitles[i].Data());
@@ -154,15 +161,24 @@ void cycQrtPlots(TTree *quartetwise, Int_t runNum, Int_t cycNum, vector<int> cyc
   TString per3 = Form("firstMPSnumber>=%i && firstMPSnumber<=%i", lStart, lEnd);
   TString cycCut = Form("(firstMPSnumber>=%i && firstMPSnumber<=%i) || (firstMPSnumber>=%i && firstMPSnumber<=%i) || (firstMPSnumber>=%i && firstMPSnumber<=%i)", fStart, fEnd, oStart, oEnd, lStart, lEnd);
 
-  TString varCuts[cycQrtVars] =  {Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()), 
-                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),
-                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),
-                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),
-                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),
-                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),
-                                  B1, B1, B1, B1};
+  TString varCuts[cycQrtVars] =  {Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //PosAcc0LasOn, NegAcc0LasOn
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //DiffAcc0LasOn, SummAcc0LasOn
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //PosAcc0LasOff1, NegAcc0LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //DiffAcc0LasOff1, SummAcc0LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //PosAcc0LasOff2, NegAcc0LasOff2
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //DiffAcc0LasOff2, SummAcc0LasOff2
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //PosAcc0BeamOff, NegAcc0BeamOff
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //DiffAcc0BeamOff, SummAcc0BeamOff
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //PosAcc4LasOn, NegAcc4LasOn
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //DiffAcc4LasOn, SummAcc4LasOn
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //PosAcc4LasOff1, NegAcc4LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //DiffAcc4LasOff1, SummAcc4LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //PosAcc4LasOff2, NegAcc4LasOff2
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //DiffAcc4LasOff2, SummAcc4LasOff2
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //PosAcc4BeamOff, NegAcc4BeamOff
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //DiffAcc4BeamOff, SummAcc4BeamOff
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data()),   //diff_bpmAx, diff_bpmAy
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data())};  //diff_bpmBx, diff_bpmBy
   Int_t sum0OnInd = 3;
   Int_t sum0Off1Ind = 7;
   Int_t sum0Off2Ind = 11;
