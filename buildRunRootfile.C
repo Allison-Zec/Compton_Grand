@@ -76,17 +76,20 @@ void epicsPlots(vector<vector<TString>> runEpcVars, Int_t runNum, TTree *epicswi
 
 void buildRunRootfile(Int_t runNum){
   TFile *runOut = new TFile(Form("%s/Run%i_Plots.root", getenv("COMPMON_RUNPLOTS"), runNum), "RECREATE");
-  TFile *infile = new TFile(Form("%s/compmon_%i.root", getenv("COMP_ROOTFILES"), runNum), "READ");
+  //TFile *infile = new TFile(Form("%s/compmon_%i.root", getenv("COMP_ROOTFILES"), runNum), "READ");
+  vector<TChain *> runChains = loadChain(runNum);
+  TChain *mpswise = runChains[0]; TChain *quartetwise = runChains[1];
+  TChain *epicswise = runChains[4]; TChain *triggerwise = runChains[3];
 
   //vector<vector<TString>> cycMPSVars = readVarsFile("cyc", "mpswise");
   //vector<vector<TString>> cycQrtVars = readVarsFile("cyc", "quartetwise");
   //vector<vector<TString>> runMPSVars = readVarsFile("run", "mpswise");
   //vector<vector<TString>> runEpcVars = readVarsFile("run", "epicswise");
 
-  TTree *mpswise = (TTree *)gDirectory->Get("mpswise");
-  TTree *quartetwise = (TTree *)gDirectory->Get("quartetwise");
-  TTree *epicswise = (TTree *)gDirectory->Get("epicswise");
-  TTree *triggerwise = (TTree *)gDirectory->Get("triggerwise");
+  //TTree *mpswise = (TTree *)gDirectory->Get("mpswise");
+  //TTree *quartetwise = (TTree *)gDirectory->Get("quartetwise");
+  //TTree *epicswise = (TTree *)gDirectory->Get("epicswise");
+  //TTree *triggerwise = (TTree *)gDirectory->Get("triggerwise");
   vector<vector<int>> cycles = findCycles(runNum);
   for(Int_t c = 0; c < cycles.size(); c++){
     printf("Plotting cycle %i/%i...\n", c + 1, (Int_t)cycles.size());

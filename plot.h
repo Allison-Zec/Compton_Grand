@@ -122,7 +122,7 @@ TString evtCutStr(Int_t runNum){
   return mapCuts;
 }
 
-void cycMPSPlots(TTree *mpswise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
+void cycMPSPlots(TChain *mpswise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
   Int_t fStart = cyc[0]; Int_t fEnd = cyc[1];
   Int_t oStart = cyc[2]; Int_t oEnd = cyc[3];
   Int_t lStart = cyc[4]; Int_t lEnd = cyc[5];
@@ -152,7 +152,7 @@ void cycMPSPlots(TTree *mpswise, Int_t runNum, Int_t cycNum, vector<int> cyc, TF
   }
 }
 
-void cycQrtPlots(TTree *quartetwise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
+void cycQrtPlots(TChain *quartetwise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
   Int_t fStart = cyc[0]; Int_t fEnd = cyc[1];
   Int_t oStart = cyc[2]; Int_t oEnd = cyc[3];
   Int_t lStart = cyc[4]; Int_t lEnd = cyc[5];
@@ -223,7 +223,7 @@ void cycQrtPlots(TTree *quartetwise, Int_t runNum, Int_t cycNum, vector<int> cyc
   }
 }
 
-void cycTrgPlots(TTree* triggerwise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
+void cycTrgPlots(TChain* triggerwise, Int_t runNum, Int_t cycNum, vector<int> cyc, TFile *runOut){
   Int_t fStart = cyc[0]; Int_t fEnd = cyc[1];
   Int_t lStart = cyc[4]; Int_t lEnd = cyc[5];
   TString per1 = Form("(mpsCoda>=%i && mpsCoda<=%i)", fStart, fEnd);
@@ -275,7 +275,7 @@ void cycTrgPlots(TTree* triggerwise, Int_t runNum, Int_t cycNum, vector<int> cyc
   
 }
 
-void runMPSPlots(TTree *mpswise, Int_t runNum, TFile *runOut){
+void runMPSPlots(TChain *mpswise, Int_t runNum, TFile *runOut){
   TString varCuts[23] =  {B1L1, B1L0, B0, B1L1, B1L0, B0,
                           L1, B1, B1, B1, B1, B1,
                           B1L1, B1L0, B1, B1, B1, B1,
@@ -295,7 +295,7 @@ void runMPSPlots(TTree *mpswise, Int_t runNum, TFile *runOut){
   }
 }
 
-void runEpicsPlots(TTree *epicswise, TTree* mpswise, Int_t runNum, TFile *runOut){
+void runEpicsPlots(TChain *epicswise, TChain* mpswise, Int_t runNum, TFile *runOut){
   string *date_ptr = 0;
   epicswise->SetBranchAddress("epics_datestring", &date_ptr);
   epicswise->GetEntry(0);

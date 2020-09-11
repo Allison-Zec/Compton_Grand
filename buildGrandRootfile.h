@@ -41,7 +41,7 @@ Float_t meanSum0LasOff, meanErrSum0LasOff, meanSum0LasOff1, meanErrSum0LasOff1, 
 Float_t meanDiff4LasOn, meanErrDiff4LasOn, meanSum4LasOn, meanErrSum4LasOn;
 Float_t meanDiff4LasOff, meanErrDiff4LasOff, meanDiff4LasOff1, meanErrDiff4LasOff1, meanDiff4LasOff2, meanErrDiff4LasOff2;
 Float_t meanSum4LasOff, meanErrSum4LasOff, meanSum4LasOff1, meanErrSum4LasOff1, meanSum4LasOff2, meanErrSum4LasOff2;
-Float_t anPow;
+PolVar anPow;
 PolVar bkSubSum0, bkSubSum4;
 PolVar bkSubAsym0LasOn, bkSubAsym0LasOff, bkSubAsym0LasOff1, bkSubAsym0LasOff2, asym0;
 PolVar bkSubAsym4LasOn, bkSubAsym4LasOff, bkSubAsym4LasOff1, bkSubAsym4LasOff2, asym4;
@@ -91,13 +91,81 @@ Int_t helicityFreq(Int_t runNum){
     return 120;
 }
 
-Double_t getAnalyzingPower(int run_num){
-  if(run_num < 3800){return 0.1105;}
-  else if(run_num >= 4232 && run_num <= 4929){return 0.01655915;}
-  else if(run_num >= 4930){return 0.036017934;}
+/**
+  This function grabs the BPM information that was calculated in cycIterSet() in
+  buildGrandRootfile.C and puts it in a 2D vector for use in calculating
+  analyzing power. The outside vector contains two vectors each with 4 elements 
+  each. The first vector contains the BPM mean positions for the cycle being
+  considered, while the second contains their statistical error for the cycle.
+
+  The four elements represent the four positions tracked by 2A and 2B.
+
+  They go in this order:
+  Index 0 = bpmAx, Index 1 = bpmAy, Index 2 = bpmBx, Index 3 = bpmBy
+
+  So the mean position for bpmBx (for example) in this vector would be
+  cycBPMs[0][2]
+
+  And the mean error on bpmAy (for example) would be
+  cycBPMs[1][1]
+**/
+vector<vector<Float_t>> getCyclePositions(){
+  vector<vector<Float_t>> cycBPMs;
+  vector<Float_t> bpmMeans, bpmErrs;
+
+  bpmMeans.push_back(cycMPSData[10].mean); bpmErrs.push_back(cycMPSData[10].meanErr);
+  bpmMeans.push_back(cycMPSData[11].mean); bpmErrs.push_back(cycMPSData[11].meanErr);
+  bpmMeans.push_back(cycMPSData[12].mean); bpmErrs.push_back(cycMPSData[12].meanErr);
+  bpmMeans.push_back(cycMPSData[13].mean); bpmErrs.push_back(cycMPSData[13].meanErr);
+
+  cycBPMs.push_back(bpmMeans); cycBPMs.push_back(bpmErrs);
+
+  return cycBPMs;
+}
+
+/**
+  The variable anPow is defined above in this file and is a PolVar.
+  The definition of PolVar can be found in vars.h in this folder. In words,
+  a PolVar is a struct with two Float_t's: mean and meanErr. anPow gets
+  written to the cyc tree in the grand rootfile, so it is defined independently
+  for each cycle.
+ 
+  This function is called once per cycle: at the start of calcPolarization() in
+  buildGrandRootfile.C. anPow is a variable shared between these two files so
+  any change in the .C file affects the .h file too.
+
+  Right now the function sets the mean analyzing powers from simulation for
+  PREX and CREX plus some legacy DVCS code I'm not sure I can get rid of.
+  
+  meanErr's are set to zero since there is no error from the simulations
+  (or at least it is vanishingly small. I've left them in because the bpm's
+  will have some uncertainty attached to them from statistics that will
+  probably need to get propagated upwards. My guess is that these will too
+  be vanishingly small, but it's best to be thorough.
+
+  The BPM position function is called but never used. This is where we implement
+  the position correction. All we need is a function to propagate the BPM positions
+  onto the collimator surface and determine the analyzing power change from the
+  offset from center.
+**/
+void setAnalyzingPower(int run_num){
+  vector<vector<Float_t>> bpmMeans = getCyclePositions();
+  if(run_num < 3800){                                               //DVCS runs (added for backwards compatibility)
+    anPow.mean = 0.1105;
+    anPow.meanErr = 0.0;
+   }                                
+  else if(run_num >= 4232 && run_num <= 4929){                      //PREX runs
+    anPow.mean = 0.01655915;
+    anPow.meanErr = 0.0;
+  }
+  else if(run_num >= 4930){                                         //CREX runs
+    anPow.mean = 0.036017934;
+    anPow.meanErr = 0.0;
+  }
   else{
     printf("Run doesn't have a defined analyzing power.\n");
-    return 0.0;
+    anPow.mean = 0.0;
+    anPow.meanErr = 0.0;
   }
 }
 
@@ -148,6 +216,54 @@ vector<vector<int>> findCycles(int runNum){
   printf("Looked in %s/cycles_%i.dat\n", getenv("COMPMON_MINIRUNS"), runNum);
   printf("Found %i cycles\n", (Int_t)run.size());
   return run;
+}
+
+void resetChain(TChain *ch){
+  if(ch){
+    delete ch;
+  }
+}
+
+vector<TChain *> loadChain(Int_t runnum){
+  TChain *mpswise = 0; TChain *quartetwise = 0;
+  TChain *pulserwise = 0; TChain *triggerwise = 0;
+  TChain *epicswise = 0; TChain *runwise = 0;
+  TChain *snapshots = 0;
+
+  resetChain(mpswise); resetChain(quartetwise);
+  resetChain(pulserwise); resetChain(triggerwise);
+  resetChain(epicswise); resetChain(runwise);
+  resetChain(snapshots);
+
+  mpswise = new TChain("mpswise");
+  quartetwise = new TChain("quartetwise");
+  pulserwise = new TChain("pulserwise");
+  triggerwise = new TChain("triggerwise");
+  epicswise = new TChain("epicswise");
+  runwise = new TChain("runwise");
+  snapshots = new TChain("snapshots");
+  std::vector<TChain*> chains;
+  chains.push_back(mpswise);
+  chains.push_back(quartetwise);
+  chains.push_back(pulserwise);
+  chains.push_back(triggerwise);
+  chains.push_back(epicswise);
+  chains.push_back(runwise);
+  chains.push_back(snapshots);
+
+  TString filesPre = Form("%s/compmon_%d",getenv("COMP_ROOTFILES"),runnum);
+  int nfiles = 0;
+  for(size_t ch = 0; ch < chains.size(); ch++) {
+    nfiles = chains[ch]->Add(filesPre+".root");
+    nfiles += chains[ch]->Add(filesPre+"_*.root");
+
+    if(nfiles<=0) {
+	    std::cerr << "Looked for files under: " << filesPre+".root" << std::endl;
+	    std::cerr << "Found no files to plot!" << std::endl;
+	    return chains;
+    }
+  }
+  return chains;
 }
 
 #endif

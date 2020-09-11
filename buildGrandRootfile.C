@@ -36,7 +36,7 @@ Bool_t acceptCycle(Int_t runNum){
 }
 
 void calcCyclePol(Int_t runNum){
-  anPow = getAnalyzingPower(runNum);
+  setAnalyzingPower(runNum);
 
   Int_t diff0On = 0; Int_t sum0On = 1; Int_t diff0Off1 = 2; Int_t sum0Off1 = 3; Int_t diff0Off2 = 4; Int_t sum0Off2 = 5;
   Int_t diff4On = 6; Int_t sum4On = 7; Int_t diff4Off1 = 8; Int_t sum4Off1 = 9; Int_t diff4Off2 = 10; Int_t sum4Off2 = 11;
@@ -69,8 +69,8 @@ void calcCyclePol(Int_t runNum){
   asym0LasOff.meanErr = TMath::Sqrt(TMath::Power(asym0LasOff1.meanErr, 2) + TMath::Power(asym0LasOff2.meanErr, 2))/2.0;
   asym0.mean = asym0LasOn.mean - asym0LasOff.mean; 
   asym0.meanErr = TMath::Sqrt(TMath::Power(asym0LasOn.meanErr, 2) + TMath::Power(asym0LasOff.meanErr, 2));
-  pol0.mean = asym0.mean/anPow;
-  pol0.meanErr = asym0.meanErr/anPow;
+  pol0.mean = asym0.mean/anPow.mean;
+  pol0.meanErr = pol0.mean*TMath::Sqrt(TMath::Power(asym0.meanErr/asym0.mean, 2) + TMath::Power(anPow.meanErr/anPow.mean, 2));
 
   meanDiff4LasOn = cycQrtCalc[diff4On].mean; meanErrDiff4LasOn = cycQrtCalc[diff4On].meanErr; 
   meanSum4LasOn = cycQrtCalc[sum4On].mean; meanErrSum4LasOn = cycQrtCalc[sum4On].meanErr;
@@ -100,8 +100,8 @@ void calcCyclePol(Int_t runNum){
   asym4LasOff.meanErr = TMath::Sqrt(TMath::Power(asym4LasOff1.meanErr, 2) + TMath::Power(asym4LasOff2.meanErr, 2))/2.0;
   asym4.mean = asym4LasOn.mean - asym4LasOff.mean; 
   asym4.meanErr = TMath::Sqrt(TMath::Power(asym4LasOn.meanErr, 2) + TMath::Power(asym4LasOff.meanErr, 2));
-  pol4.mean = asym4.mean/anPow;
-  pol4.meanErr = asym4.meanErr/anPow;
+  pol4.mean = asym4.mean/anPow.mean;
+  pol4.meanErr = pol4.mean*TMath::Sqrt(TMath::Power(asym4.meanErr/asym4.mean, 2) + TMath::Power(anPow.meanErr/anPow.mean, 2));
 
   if(acceptCycle(runNum)){
     runAsym0Avg.push_back(asym0.mean); runAsym0Err.push_back(asym0.meanErr);
@@ -211,7 +211,7 @@ void initCycleTree(TTree *cyc){
   //cyc->Branch("PedestalMeanLastOff", &lastOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
   for(Int_t i = 0; i < cycQrtVars; i++){DataVar data; cycQrtData.push_back(data);}
   for(Int_t i = 0; i < cycQrtVars; i++){cyc->Branch(cycQrtTitles[i].Data(), &cycQrtData[i], "mean/F:meanErr/F:rms/F:rmsErr/F");}
-  cyc->Branch("AnalyzingPower", &anPow, "AnalyzingPower/F");
+  cyc->Branch("AnalyzingPower", &anPow, "mean/F:meanErr/F");
   cyc->Branch("BackSubSum0", &bkSubSum0, "mean/F:meanErr/F");
   cyc->Branch("Asym0LasOn", &asym0LasOn, "mean/F:meanErr/F");
   cyc->Branch("Asym0LasOff", &asym0LasOff, "mean/F:meanErr/F");
