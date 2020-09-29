@@ -122,6 +122,20 @@ void drawAndPrintGraphs(TString msmt, Int_t msmtNum, TCanvas *can, vector<TGraph
   can->Print(Form("%s/plots/msmt%04i_%s.pdf", getenv("COMPMON_GRAND"), msmtNum, msmt.Data()), "pdf");
 }
 
+//||====================================||
+//||                                    ||
+//||  //====\\  |\   || ||              ||
+//|| //      \\ |\\  || ||              ||
+//|| \\         ||\\ || ||              ||
+//||  \\====\\  || \\|| ||              ||
+//||         \\ ||  \|| ||              ||
+//||         || ||   \| ||              ||
+//||         || ||   || ||              ||
+//|| \\      // ||   || ||              ||
+//||  \\====//  ||   || ||======        ||
+//||                                    ||
+//||====================================||
+
 void plotPolSnl(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Float_t largeFac, bool signCorr=true, bool chi2=false, Float_t factor=1.0){
   FitPolVar var;
   vector<TGraphErrors *> graphs;
@@ -234,6 +248,20 @@ void plotStandardSnl(TString fname, TString msmt, Int_t msmtNum, Float_t smallFa
   grand->Close();
 }
 
+//||====================================||
+//||                                    ||
+//|| ||====\\ ||     || |\   ||         ||
+//|| ||    || ||     || |\\  ||         ||
+//|| ||    || ||     || ||\\ ||         ||
+//|| ||====// ||     || || \\||         ||
+//|| ||\\     ||     || ||  \\|         ||
+//|| || \\    ||     || ||   \|         ||
+//|| ||  \\   ||     || ||   ||         ||
+//|| ||   \\  \\     // ||   ||         ||
+//|| ||    \\  \\===//  ||   ||         ||
+//||                                    ||
+//||====================================||
+
 void plotPolRun(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Float_t largeFac, bool signCorr=true, bool chi2=false){
   FitPolVar var;
   vector<TGraphErrors *> graphs;
@@ -339,6 +367,131 @@ void plotStandardRun(TString fname, TString msmt, Int_t msmtNum, Float_t smallFa
     }
     if(runNum - 5 < xmin){xmin = runNum - 5;}
     if(runNum + 5 > xmax){xmax = runNum + 5;}
+    graphCounts[ind] += 1;
+  }
+
+  adjustGraphLimits(graphs, ymin, ymax, smallFac, largeFac, xmin, xmax);
+  drawAndPrintGraphs(msmt, msmtNum, can, graphs);
+  grand->Close();
+}
+
+//||====================================||
+//||                                    ||
+//||  //====\\  \\    //  //====\\      ||
+//|| //      \\  \\  //  //      \\     ||
+//|| ||           \\//   ||             ||
+//|| ||            \/    ||             ||
+//|| ||            ||    ||             ||
+//|| ||            ||    ||             ||
+//|| ||            ||    ||             ||
+//|| \\      //    ||    \\      //     ||
+//||  \\====//     ||     \\====//      ||
+//||                                    ||
+//||====================================||
+
+void plotPolCyc(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Float_t largeFac, bool signCorr=true){
+  PolVar var;
+  vector<TGraphErrors *> graphs;
+  vector<Int_t> graphCounts;
+
+  TFile *grand = new TFile(Form("%s/%s", getenv("COMPMON_GRAND"), fname.Data()), "READ");
+  TTree *tree = (TTree *)grand->Get("cyc");
+  Float_t ymin = 1e16; Float_t ymax = -1e16;
+  Float_t xmin = 0; Float_t xmax = 1.05*tree->GetEntries("sign!=0 && CycleCut==0");
+  TString signID("");
+  if(signCorr) signID = "sign";
+  TString canName = Form("can%s_%s", signID.Data(), msmt.Data());
+  TCanvas *can = new TCanvas(canName.Data(), "Some Title", 1200, 400);
+  TString titleAdd(""); TString chiAdd("");
+  if(signCorr) titleAdd = " (Sign Corrected)";
+
+  Int_t runNum, sign, cycCut;
+  Float_t vWien, hWien, solWien, ihwp;
+  tree->SetBranchAddress("runNum", &runNum);
+  tree->SetBranchAddress("ihwp", &ihwp);
+  tree->SetBranchAddress("VWienAngle", &vWien);
+  tree->SetBranchAddress("HWienAngle", &hWien);
+  tree->SetBranchAddress("PhiFG", &solWien);
+  tree->SetBranchAddress("sign", &sign);
+  tree->SetBranchAddress("CycleCut", &cycCut);
+  tree->SetBranchAddress(msmt.Data(), &var);
+  for(Int_t i = 0; i < 4; i++){
+    TGraphErrors *g = new TGraphErrors();
+    g->SetTitle(Form("%s%s vs Cycle", msmt.Data(), titleAdd.Data()));
+    g->GetXaxis()->SetTitle("cycNum"); g->GetYaxis()->SetTitle(msmt.Data());
+    g->SetMarkerStyle(getMarkerStyle(i)); g->SetMarkerColor(getColor(i));
+    graphs.push_back(g); graphCounts.push_back(0);
+  }
+
+  for(Int_t i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+    if(sign == 0 || cycCut == 1) continue;
+    Int_t ind = getGraphInd(runNum, hWien, vWien, solWien, ihwp, false);
+    Float_t polVar = var.mean; Float_t polErr = var.meanErr;
+    if(signCorr){polVar = var.mean*sign;}
+    if(TMath::IsNaN(polVar)) continue;
+    graphs[ind]->SetPoint(graphCounts[ind], graphCounts[0] + graphCounts[1] + graphCounts[2] + graphCounts[3], polVar);
+    graphs[ind]->SetPointError(graphCounts[ind], 0.0, polErr);
+    graphCounts[ind] += 1;
+    if(polVar - polErr < ymin){ymin = polVar - polErr;}
+    if(polVar + polErr > ymax){ymax = polVar + polErr;}
+    //if(runNum - 5 < xmin){xmin = runNum - 5;}
+    //if(runNum + 5 > xmax){xmax = runNum + 5;}
+    //printf("<tr class=\"myRow\"><td class=\"myCell\">%i</td><td class=\"myCell\">%.4f +/ %.4f</td></tr>\n", snailNum, 1000*polVar, 1000*polErr);
+  }
+
+  adjustGraphLimits(graphs, ymin, ymax, smallFac, largeFac, xmin, xmax);
+  drawAndPrintGraphs(msmt, msmtNum, can, graphs);
+  grand->Close();
+}
+
+void plotStandardCyc(TString fname, TString msmt, Int_t msmtNum, Float_t smallFac, Float_t largeFac, bool signCorr=false){
+  Int_t runNum, sign, cycCut;
+  Float_t hWien, vWien, solWien, ihwp;
+  DataVar data;
+
+  TFile *grand = new TFile(Form("%s/%s", getenv("COMPMON_GRAND"), fname.Data()), "READ");
+  TTree *tree = (TTree *)grand->Get("cyc");
+  TCanvas *can = new TCanvas(Form("can_%s", msmt.Data()), "", 1200, 400); 
+  vector<TGraphErrors *> graphs; vector<Int_t> graphCounts;
+  Float_t ymin = 1e16; Float_t ymax = -1e16;
+  Float_t xmin = 0; Float_t xmax = 1.05*tree->GetEntries("sign!=0 && CycleCut==0");
+
+  tree->SetBranchAddress("runNum", &runNum);
+  tree->SetBranchAddress("HWienAngle", &hWien);
+  tree->SetBranchAddress("VWienAngle", &vWien);
+  tree->SetBranchAddress("PhiFG", &solWien);
+  tree->SetBranchAddress("ihwp", &ihwp);
+  tree->SetBranchAddress("sign", &sign);
+  tree->SetBranchAddress("CycleCut", &cycCut);
+  tree->SetBranchAddress(msmt.Data(), &data);
+  
+  for(Int_t i = 0; i < 4; i++){
+    TGraphErrors *g = new TGraphErrors();
+    g->SetTitle(Form("%s vs Cycle", msmt.Data()));
+    g->GetXaxis()->SetTitle("cycNum"); g->GetYaxis()->SetTitle(msmt.Data());
+    g->SetMarkerStyle(getMarkerStyle(i)); g->SetMarkerColor(getColor(i));
+    graphs.push_back(g); graphCounts.push_back(0);
+  }
+
+  for(Int_t i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+    if(sign==0 || cycCut==1) continue;
+    Int_t ind = getGraphInd(runNum, hWien, vWien, solWien, ihwp, false);
+    if(signCorr){
+      graphs[ind]->SetPoint(graphCounts[ind], graphCounts[0] + graphCounts[1] + graphCounts[2] + graphCounts[3], data.mean*sign);
+      graphs[ind]->SetPointError(graphCounts[ind], 0.0, data.meanErr);
+      if(data.mean*sign - data.meanErr < ymin){ymin = data.mean*sign - data.meanErr;}
+      if(data.mean*sign + data.meanErr > ymax){ymax  =data.mean*sign + data.meanErr;}
+    }
+    else{
+      graphs[ind]->SetPoint(graphCounts[ind], graphCounts[0] + graphCounts[1] + graphCounts[2] + graphCounts[3], data.mean);
+      graphs[ind]->SetPointError(graphCounts[ind], 0.0, data.meanErr);
+      if(data.mean - data.meanErr < ymin){ymin = data.mean - data.meanErr;}
+      if(data.mean + data.meanErr > ymax){ymax = data.mean + data.meanErr;}
+    }
+    //if(runNum - 5 < xmin){xmin = runNum - 5;}
+    //if(runNum + 5 > xmax){xmax = runNum + 5;}
     graphCounts[ind] += 1;
   }
 

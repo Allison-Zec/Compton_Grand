@@ -22,10 +22,16 @@ void readKeysFile(TString expt){
 }
 
 Bool_t acceptCycle(Int_t runNum){
-  if(keys.size() == 0){return true;}
+  if(keys.size() == 0){
+    acc0OnMode = 0.0; acc0OnOffset = 0.0;
+    acc0OffMode = 0.0; acc0OffOffset = 0.0;
+    return true;
+  }
   else{
     for(Int_t i = 0; i < keys.size(); i++){
       if(runNum >= (Int_t)keys[i][0] && runNum <= (Int_t)keys[i][1]){
+        acc0OnMode = keys[i][3]; acc0OnOffset = keys[i][4];
+        acc0OffMode = keys[i][2]; acc0OffOffset = keys[i][4];
         Float_t offLimit = keys[i][2] + keys[i][4];
         Float_t onLimit = keys[i][3] + keys[i][4];
         return cycMPSData[1].rms < offLimit && cycMPSData[2].rms < offLimit && cycMPSData[0].rms < onLimit;
@@ -54,13 +60,13 @@ void calcCyclePol(Int_t runNum){
   bkSubSum0.mean = meanSum0LasOn - meanSum0LasOff;
   bkSubSum0.meanErr = TMath::Sqrt(TMath::Power(meanErrSum0LasOn, 2) + TMath::Power(meanErrSum0LasOff, 2));
   bkSubAsym0LasOn.mean = meanDiff0LasOn/bkSubSum0.mean;
-  bkSubAsym0LasOn.meanErr = bkSubAsym0LasOn.mean*TMath::Sqrt(TMath::Power(meanErrDiff0LasOn/meanDiff0LasOn, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
+  bkSubAsym0LasOn.meanErr = TMath::Abs(bkSubAsym0LasOn.mean)*TMath::Sqrt(TMath::Power(meanErrDiff0LasOn/meanDiff0LasOn, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
   bkSubAsym0LasOff.mean = meanDiff0LasOff/bkSubSum0.mean;
-  bkSubAsym0LasOff.meanErr = bkSubAsym0LasOff.mean*TMath::Sqrt(TMath::Power(meanErrDiff0LasOff/meanDiff0LasOff, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
+  bkSubAsym0LasOff.meanErr = TMath::Abs(bkSubAsym0LasOff.mean)*TMath::Sqrt(TMath::Power(meanErrDiff0LasOff/meanDiff0LasOff, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
   bkSubAsym0LasOff1.mean = meanDiff0LasOff1/bkSubSum0.mean;
-  bkSubAsym0LasOff1.meanErr = bkSubAsym0LasOff1.mean*TMath::Sqrt(TMath::Power(meanErrDiff0LasOff1/meanDiff0LasOff1, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
+  bkSubAsym0LasOff1.meanErr = TMath::Abs(bkSubAsym0LasOff1.mean)*TMath::Sqrt(TMath::Power(meanErrDiff0LasOff1/meanDiff0LasOff1, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
   bkSubAsym0LasOff2.mean = meanDiff0LasOff2/bkSubSum0.mean;
-  bkSubAsym0LasOff2.meanErr = bkSubAsym0LasOff2.mean*TMath::Sqrt(TMath::Power(meanErrDiff0LasOff2/meanDiff0LasOff2, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
+  bkSubAsym0LasOff2.meanErr = TMath::Abs(bkSubAsym0LasOff2.mean)*TMath::Sqrt(TMath::Power(meanErrDiff0LasOff2/meanDiff0LasOff2, 2) + TMath::Power(bkSubSum0.meanErr/bkSubSum0.mean, 2));
   //asym0.mean = asym0LasOn.mean - asym0LasOff.mean;
   //asym0.meanErr = TMath::Sqrt(TMath::Power(asym0LasOn.meanErr, 2) + TMath::Power(asym0LasOff.meanErr, 2));
   asym0LasOff1.mean = bkSubAsym0LasOff1.mean; asym0LasOff1.meanErr = bkSubAsym0LasOff1.meanErr;
@@ -70,7 +76,7 @@ void calcCyclePol(Int_t runNum){
   asym0.mean = asym0LasOn.mean - asym0LasOff.mean; 
   asym0.meanErr = TMath::Sqrt(TMath::Power(asym0LasOn.meanErr, 2) + TMath::Power(asym0LasOff.meanErr, 2));
   pol0.mean = asym0.mean/anPow.mean;
-  pol0.meanErr = pol0.mean*TMath::Sqrt(TMath::Power(asym0.meanErr/asym0.mean, 2) + TMath::Power(anPow.meanErr/anPow.mean, 2));
+  pol0.meanErr = TMath::Abs(pol0.mean)*TMath::Sqrt(TMath::Power(asym0.meanErr/asym0.mean, 2) + TMath::Power(anPow.meanErr/anPow.mean, 2));
 
   meanDiff4LasOn = cycQrtCalc[diff4On].mean; meanErrDiff4LasOn = cycQrtCalc[diff4On].meanErr; 
   meanSum4LasOn = cycQrtCalc[sum4On].mean; meanErrSum4LasOn = cycQrtCalc[sum4On].meanErr;
@@ -85,13 +91,13 @@ void calcCyclePol(Int_t runNum){
   bkSubSum4.mean = meanSum4LasOn - meanSum4LasOff;
   bkSubSum4.meanErr = TMath::Sqrt(TMath::Power(meanErrSum4LasOn, 2) + TMath::Power(meanErrSum4LasOff, 2));
   bkSubAsym4LasOn.mean = meanDiff4LasOn/bkSubSum4.mean;
-  bkSubAsym4LasOn.meanErr = bkSubAsym4LasOn.mean*TMath::Sqrt(TMath::Power(meanErrDiff4LasOn/meanDiff4LasOn, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
+  bkSubAsym4LasOn.meanErr = TMath::Abs(bkSubAsym4LasOn.mean)*TMath::Sqrt(TMath::Power(meanErrDiff4LasOn/meanDiff4LasOn, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
   bkSubAsym4LasOff.mean = meanDiff4LasOff/bkSubSum4.mean;
-  bkSubAsym4LasOff.meanErr = bkSubAsym4LasOff.mean*TMath::Sqrt(TMath::Power(meanErrDiff4LasOff/meanDiff4LasOff, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
+  bkSubAsym4LasOff.meanErr = TMath::Abs(bkSubAsym4LasOff.mean)*TMath::Sqrt(TMath::Power(meanErrDiff4LasOff/meanDiff4LasOff, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
   bkSubAsym4LasOff1.mean = meanDiff4LasOff1/bkSubSum4.mean;
-  bkSubAsym4LasOff1.meanErr = bkSubAsym4LasOff1.mean*TMath::Sqrt(TMath::Power(meanErrDiff4LasOff1/meanDiff4LasOff1, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
+  bkSubAsym4LasOff1.meanErr = TMath::Abs(bkSubAsym4LasOff1.mean)*TMath::Sqrt(TMath::Power(meanErrDiff4LasOff1/meanDiff4LasOff1, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
   bkSubAsym4LasOff2.mean = meanDiff4LasOff2/bkSubSum4.mean;
-  bkSubAsym4LasOff2.meanErr = bkSubAsym4LasOff2.mean*TMath::Sqrt(TMath::Power(meanErrDiff4LasOff2/meanDiff4LasOff2, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
+  bkSubAsym4LasOff2.meanErr = TMath::Abs(bkSubAsym4LasOff2.mean)*TMath::Sqrt(TMath::Power(meanErrDiff4LasOff2/meanDiff4LasOff2, 2) + TMath::Power(bkSubSum4.meanErr/bkSubSum4.mean, 2));
   //asym4.mean = asym4LasOn.mean - asym4LasOff.mean;
   //asym4.meanErr = TMath::Sqrt(TMath::Power(asym4LasOn.meanErr, 2) + TMath::Power(asym4LasOff.meanErr, 2));
   asym4LasOff1.mean = bkSubAsym4LasOff1.mean; asym4LasOff1.meanErr = bkSubAsym4LasOff1.meanErr;
@@ -101,7 +107,7 @@ void calcCyclePol(Int_t runNum){
   asym4.mean = asym4LasOn.mean - asym4LasOff.mean; 
   asym4.meanErr = TMath::Sqrt(TMath::Power(asym4LasOn.meanErr, 2) + TMath::Power(asym4LasOff.meanErr, 2));
   pol4.mean = asym4.mean/anPow.mean;
-  pol4.meanErr = pol4.mean*TMath::Sqrt(TMath::Power(asym4.meanErr/asym4.mean, 2) + TMath::Power(anPow.meanErr/anPow.mean, 2));
+  pol4.meanErr = TMath::Abs(pol4.mean)*TMath::Sqrt(TMath::Power(asym4.meanErr/asym4.mean, 2) + TMath::Power(anPow.meanErr/anPow.mean, 2));
 
   if(acceptCycle(runNum)){
     runAsym0Avg.push_back(asym0.mean); runAsym0Err.push_back(asym0.meanErr);
@@ -204,7 +210,12 @@ void initCycleTree(TTree *cyc){
   cyc->Branch("onEndMPS", &onEndMPS, "onEndMPS/I");
   cyc->Branch("lastOffStartMPS", &lastOffStartMPS, "lastOffStartMPS/I");
   cyc->Branch("lastOffEndMPS", &lastOffEndMPS, "lastOffEndMPS/I");
-  cyc->Branch("cycleTime", &cycleTime);
+  cyc->Branch("cycleTime", &cycleTime, "cycleTime/F");
+  cyc->Branch("sign", &cycSign, "sign/I");
+  cyc->Branch("ihwp", &cycIHWP, "ihwp/F");
+  cyc->Branch("VWienAngle", &cycVWien, "VWienAngle/F");
+  cyc->Branch("HWienAngle", &cycHWien, "HWienAngle/F");
+  cyc->Branch("PhiFG", &cycSolWien, "PhiFG/F");
   for(Int_t i = 0; i < cycMPSVars; i++){DataVar data; cycMPSData.push_back(data);}
   for(Int_t i = 0; i < cycMPSVars; i++){cyc->Branch(cycMPSTitles[i].Data(), &cycMPSData[i], "mean/F:meanErr/F:rms/F:rmsErr/F");}
   //cyc->Branch("PedestalMeanFirstOff", &firstOffPedestal, "mean/F:meanErr/F:rms/F:rmsErr/F");
@@ -232,7 +243,11 @@ void initCycleTree(TTree *cyc){
   cyc->Branch("BackSubAsym4LasOn", &bkSubAsym4LasOn, "mean/F:meanErr/F");
   cyc->Branch("BackSubAsym4LasOff1", &bkSubAsym4LasOff1, "mean/F:meanErr/F");
   cyc->Branch("BackSubAsym4LasOff2", &bkSubAsym4LasOff2, "mean/F:meanErr/F");
-  cyc->Branch("CycleCut", &cycleCut, "cycleCut/I");
+  cyc->Branch("CycleCut", &cycleCut, "CycleCut/I");
+  cyc->Branch("Acc0OnMode", &acc0OnMode, "Acc0OnMode/F");
+  cyc->Branch("Acc0OnOffset", &acc0OnOffset, "Acc0OnOffset/F");
+  cyc->Branch("Acc0OffMode", &acc0OffMode, "Acc0OffMode/F");
+  cyc->Branch("Acc0OffOffset", &acc0OffOffset, "Acc0OffOffset/F");
 }
 
 void initRunTree(TTree *run){
@@ -419,6 +434,11 @@ void cycleIterSet(vector<vector<int>> cycles, Int_t cycInd, Int_t runNumber, TFi
   lastOffEndMPS = cycles[cycInd][5];
   Int_t totMPS = (firstOffEndMPS - firstOffStartMPS) + (onEndMPS - onStartMPS) + (lastOffEndMPS - lastOffStartMPS);
   cycleTime = 1.0*totMPS/helicityFreq(runNumber);
+  cycSign = runSign;
+  cycIHWP = runEpcData[5].mean;
+  cycHWien = runEpcData[8].mean;
+  cycVWien = runEpcData[7].mean;
+  cycSolWien = runEpcData[9].mean;
   cycQrtCalc.clear();
   for(Int_t i = 0; i < cycMPSVars; i++){
     TString hName = Form("h%i.%i_%s", runNumber, cycleNum, cycMPSTitles[i].Data());
@@ -465,7 +485,7 @@ void buildGrandRootfile(Int_t prexOrCrex){
   readKeysFile(expt);
 
   vector<vector<int>> runList = productionRunList(prexOrCrex);
-  TFile *out = new TFile(Form("%s/%sGrandCompton.root", getenv("COMPMON_GRAND"), expt.Data()), "RECREATE");
+  TFile *out = new TFile(Form("%s/aggregates/%sGrandCompton.root", getenv("COMPMON_WEB"), expt.Data()), "RECREATE");
   TTree *cyc = new TTree("cyc", "cycle testing tree");
   TTree *run = new TTree("run", "run number testing tree");
   TTree *snl = new TTree("snl", "snail number testing tree");

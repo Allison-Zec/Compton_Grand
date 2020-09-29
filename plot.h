@@ -33,7 +33,7 @@ TString cycMPSNames[cycMPSVars] = {"Acc0/NAcc0", "Acc0/NAcc0", "Acc0/NAcc0", "Ac
                                    "bpmBx", "bpmBy", "scaler_ip13", "scaler_ip13", "scaler_run4", "scaler_run13",
                                    "scaler_run0", "scaler_run1", "scaler_run10", "scaler_run10", "scaler_run11", "scaler_run11"};
 
-const Int_t cycQrtVars = 36;
+const Int_t cycQrtVars = 47;
 TString cycQrtTitles[cycQrtVars] = {"PosAcc0LasOn",   "NegAcc0LasOn",   "DiffAcc0LasOn",   "SumAcc0LasOn",
                                     "PosAcc0LasOff1", "NegAcc0LasOff1", "DiffAcc0LasOff1", "SumAcc0LasOff1",
                                     "PosAcc0LasOff2", "NegAcc0LasOff2", "DiffAcc0LasOff2", "SumAcc0LasOff2",
@@ -42,7 +42,10 @@ TString cycQrtTitles[cycQrtVars] = {"PosAcc0LasOn",   "NegAcc0LasOn",   "DiffAcc
                                     "PosAcc4LasOff1", "NegAcc4LasOff1", "DiffAcc4LasOff1", "SumAcc4LasOff1",
                                     "PosAcc4LasOff2", "NegAcc4LasOff2", "DiffAcc4LasOff2", "SumAcc4LasOff2",
                                     "PosAcc4BeamOff", "NegAcc4BeamOff", "DiffAcc4BeamOff", "SumAcc4BeamOff",
-                                    "diff_bpmAx", "diff_bpmAy", "diff_bpmBx", "diff_bpmBy"};
+                                    "diff_bpmAx", "diff_bpmAy", "diff_bpmBx", "diff_bpmBy",
+                                    "AsymCentralRateLasOn", "AsymCentralRateLasOff", "AsymHFingerRateLasOn", "AsymHFingerRateLasOff",
+                                    "AsymVFingerRateLasOn", "AsymVFingerRateLasOff", "AsymUSbg1", "AsymUSbg2",
+                                    "AsymDSbg1", "AsymDSbg2", "AsymBCM"};
 TString cycQrtNames[cycQrtVars] =  {pos0, neg0, Form("%s - %s", pos0.Data(), neg0.Data()), Form("%s + %s", pos0.Data(), neg0.Data()),
                                     pos0, neg0, Form("%s - %s", pos0.Data(), neg0.Data()), Form("%s + %s", pos0.Data(), neg0.Data()),
                                     pos0, neg0, Form("%s - %s", pos0.Data(), neg0.Data()), Form("%s + %s", pos0.Data(), neg0.Data()),
@@ -51,7 +54,18 @@ TString cycQrtNames[cycQrtVars] =  {pos0, neg0, Form("%s - %s", pos0.Data(), neg
                                     pos4, neg4, Form("%s - %s", pos4.Data(), neg4.Data()), Form("%s + %s", pos4.Data(), neg4.Data()),
                                     pos4, neg4, Form("%s - %s", pos4.Data(), neg4.Data()), Form("%s + %s", pos4.Data(), neg4.Data()),
                                     pos4, neg4, Form("%s - %s", pos4.Data(), neg4.Data()), Form("%s + %s", pos4.Data(), neg4.Data()),
-                                    "PosHelBPMAx - NegHelBPMAx", "PosHelBPMAy - NegHelBPMAy", "PosHelBPMBx - NegHelBPMBx", "PosHelBPMBy - NegHelBPMBy"};
+                                    "PosHelBPMAx - NegHelBPMAx", "PosHelBPMAy - NegHelBPMAy", "PosHelBPMBx - NegHelBPMBx", "PosHelBPMBy - NegHelBPMBy",
+                                    "(PosHelScalerRun7 - NegHelScalerRun7)/(PosHelScalerRun7 + NegHelScalerRun7)", 
+                                    "(PosHelScalerRun7 - NegHelScalerRun7)/(PosHelScalerRun7 + NegHelScalerRun7)", 
+                                    "(PosHelScalerIP10 - NegHelScalerIP10)/(PosHelScalerIP10 + NegHelScalerIP10)", 
+                                    "(PosHelScalerIP10 - NegHelScalerIP10)/(PosHelScalerIP10 + NegHelScalerIP10)", 
+                                    "(PosHelScalerIP11 - NegHelScalerIP11)/(PosHelScalerIP11 + NegHelScalerIP11)", 
+                                    "(PosHelScalerIP11 - NegHelScalerIP11)/(PosHelScalerIP11 + NegHelScalerIP11)", 
+                                    "(PosHelScalerRun4 - NegHelScalerRun4)/(PosHelScalerRun4 + NegHelScalerRun4)",
+                                    "(PosHelScalerRun13 - NegHelScalerRun13)/(PosHelScalerRun13 + NegHelScalerRun13)",
+                                    "(PosHelScalerRun0 - NegHelScalerRun0)/(PosHelScalerRun0 + NegHelScalerRun0)",
+                                    "(PosHelScalerRun1 - NegHelScalerRun1)/(PosHelScalerRun1 + NegHelScalerRun1)",
+                                    "(PosHelBCM - NegHelBCM)/(PosHelBCM + NegHelBCM)"};
 
 const Int_t runMPSVars = 23;
 TString runMPSTitles[runMPSVars] =  {"Acc0LasOn", "Acc0LasOff", "Acc0BeamOff", "Acc4LasOn", "Acc4LasOff", "Acc4BeamOff",
@@ -161,24 +175,30 @@ void cycQrtPlots(TChain *quartetwise, Int_t runNum, Int_t cycNum, vector<int> cy
   TString per3 = Form("firstMPSnumber>=%i && firstMPSnumber<=%i", lStart, lEnd);
   TString cycCut = Form("(firstMPSnumber>=%i && firstMPSnumber<=%i) || (firstMPSnumber>=%i && firstMPSnumber<=%i) || (firstMPSnumber>=%i && firstMPSnumber<=%i)", fStart, fEnd, oStart, oEnd, lStart, lEnd);
 
-  TString varCuts[cycQrtVars] =  {Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //PosAcc0LasOn, NegAcc0LasOn
-                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //DiffAcc0LasOn, SummAcc0LasOn
-                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //PosAcc0LasOff1, NegAcc0LasOff1
-                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //DiffAcc0LasOff1, SummAcc0LasOff1
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //PosAcc0LasOff2, NegAcc0LasOff2
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //DiffAcc0LasOff2, SummAcc0LasOff2
-                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //PosAcc0BeamOff, NegAcc0BeamOff
-                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //DiffAcc0BeamOff, SummAcc0BeamOff
-                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //PosAcc4LasOn, NegAcc4LasOn
-                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),   //DiffAcc4LasOn, SummAcc4LasOn
-                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //PosAcc4LasOff1, NegAcc4LasOff1
-                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),   //DiffAcc4LasOff1, SummAcc4LasOff1
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //PosAcc4LasOff2, NegAcc4LasOff2
-                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),   //DiffAcc4LasOff2, SummAcc4LasOff2
-                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //PosAcc4BeamOff, NegAcc4BeamOff
-                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),   //DiffAcc4BeamOff, SummAcc4BeamOff
-                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data()),   //diff_bpmAx, diff_bpmAy
-                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data())};  //diff_bpmBx, diff_bpmBy
+  TString varCuts[cycQrtVars] =  {Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),     //PosAcc0LasOn, NegAcc0LasOn
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),     //DiffAcc0LasOn, SummAcc0LasOn
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),     //PosAcc0LasOff1, NegAcc0LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),     //DiffAcc0LasOff1, SummAcc0LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),     //PosAcc0LasOff2, NegAcc0LasOff2
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),     //DiffAcc0LasOff2, SummAcc0LasOff2
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),     //PosAcc0BeamOff, NegAcc0BeamOff
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),     //DiffAcc0BeamOff, SummAcc0BeamOff
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),     //PosAcc4LasOn, NegAcc4LasOn
+                                  Form("(%s) && (%s)", B1L1.Data(), per2.Data()), Form("(%s) && (%s)", B1L1.Data(), per2.Data()),     //DiffAcc4LasOn, SummAcc4LasOn
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),     //PosAcc4LasOff1, NegAcc4LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per1.Data()), Form("(%s) && (%s)", B1L0.Data(), per1.Data()),     //DiffAcc4LasOff1, SummAcc4LasOff1
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),     //PosAcc4LasOff2, NegAcc4LasOff2
+                                  Form("(%s) && (%s)", B1L0.Data(), per3.Data()), Form("(%s) && (%s)", B1L0.Data(), per3.Data()),     //DiffAcc4LasOff2, SummAcc4LasOff2
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),     //PosAcc4BeamOff, NegAcc4BeamOff
+                                  Form("(%s) && (%s)", B0.Data(), cycCut.Data()), Form("(%s) && (%s)", B0.Data(), cycCut.Data()),     //DiffAcc4BeamOff, SummAcc4BeamOff
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //diff_bpmAx, diff_bpmAy
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //diff_bpmBx, diff_bpmBy
+                                  Form("(%s) && (%s)", B1L1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1L0.Data(), cycCut.Data()), //AsymCentralRateLasOn, AsymCentralRateLasOff
+                                  Form("(%s) && (%s)", B1L1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1L0.Data(), cycCut.Data()), //AsymVFingerRateLasOn, AsymVFingerRateLasOff
+                                  Form("(%s) && (%s)", B1L1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1L0.Data(), cycCut.Data()), //AsymHFingerRateLasOn, AsymHFingerRateLasOff
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //AsymUSbg1, AsymUSbg2
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data()), Form("(%s) && (%s)", B1.Data(), cycCut.Data()),     //AsymDSbg1, AsymDSbg2
+                                  Form("(%s) && (%s)", B1.Data(), cycCut.Data())};                                                    //AsymBCM
   Int_t sum0OnInd = 3;
   Int_t sum0Off1Ind = 7;
   Int_t sum0Off2Ind = 11;

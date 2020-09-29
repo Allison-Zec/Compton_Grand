@@ -21,6 +21,8 @@ vector<vector<Float_t>> keys;
 // basics
 Int_t snailNum, runNum, cycleNum;
 Int_t firstOffStartMPS, firstOffEndMPS, onStartMPS, onEndMPS, lastOffStartMPS, lastOffEndMPS;
+Int_t cycSign;
+Float_t cycIHWP, cycVWien, cycHWien, cycSolWien;
 // mpswise
 //vector<vector<TString>> cycMPSVars;
 vector<DataVar> cycMPSData;
@@ -49,6 +51,7 @@ PolVar asym0LasOn, asym0LasOff, asym0LasOff1, asym0LasOff2;
 PolVar asym4LasOn, asym4LasOff, asym4LasOff1, asym4LasOff2;
 PolVar pol0, pol4;
 Int_t cycleCut;
+Float_t acc0OnMode, acc0OnOffset, acc0OffMode, acc0OffOffset;
 
 // run tree
 // basics
@@ -130,7 +133,7 @@ vector<vector<Float_t>> getCyclePositions(){
   written to the cyc tree in the grand rootfile, so it is defined independently
   for each cycle.
  
-  This function is called once per cycle: at the start of calcPolarization() in
+  This function is called once per cycle: at the start of calcCyclePol() in
   buildGrandRootfile.C. anPow is a variable shared between these two files so
   any change in the .C file affects the .h file too.
 
